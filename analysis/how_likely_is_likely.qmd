@@ -255,3 +255,103 @@ display(respondent_optimism.head())
 ```
 
 Because every respondent rated the same 19 terms, mean deviation equals the raw mean probability minus a constant (the average of the 19 term means). The two scores are therefore perfectly correlated here; the deviation form still makes the “relative to the phrase mean” interpretation explicit for later group comparisons.
+
+Group comparisons use a minimum of **30 respondents** per group. Groups below that threshold are excluded from ranking. Confidence intervals are **t-based 95% CIs** for the mean deviation. Kruskal–Wallis tests summarize overall differences; effect sizes (approximate η²) are emphasized over p-values. For country, only the top 15 countries by respondent count among those meeting the n ≥ 30 rule are shown (here, 12 countries qualify).
+
+```{python}
+#| label: q2-group-tables
+#| warning: false
+
+MIN_N = 30
+
+
+def group_comparison(df, col, label, top_n=None):
+    """Mean deviation by group with t-based 95% CI; keep groups with n >= MIN_N."""
+    sub = df.dropna(subset=[col, "mean_deviation"]).copy()
+    rows = []
+    for name, s in sub.groupby(col)["mean_deviation"]:
+        n = int(s.shape[0])
+        mean = float(s.mean())
+        if n > 1:
+            se = float(s.std(ddof=1) / np.sqrt(n))
+            tcrit = float(stats.t.ppf(0.975, df=n - 1))
+            ci_low, ci_high = mean - tcrit * se, mean + tcrit * se
+        else:
+            ci_low = ci_high = np.nan
+        rows.append(
+            {
+                "group": name,
+                "n": n,
+                "mean_deviation": mean,
+                "ci_low": ci_low,
+                "ci_high": ci_high,
+            }
+        )
+    out = pd.DataFrame(rows)
+    n_total_groups = out.shape[0]
+    out_qual = out[out["n"] >= MIN_N].copy()
+    n_excluded = n_total_groups - out_qual.shape[0]
+
+    if top_n is not None:
+        counts = sub.groupby(col).size().sort_values(ascending=False)
+        qualifying_counts = counts[counts >= MIN_N]
+        top_groups = qualifying_counts.head(top_n).index
+        out_qual = out_qual[out_qual["group"].isin(top_groups)]
+
+    out_qual = out_qual.sort_values("mean_deviation", ascending=False).reset_index(
+        drop=True
+    )
+    out_qual[["mean_deviation", "ci_low", "ci_high"]] = out_qual[
+        ["mean_deviation", "ci_low", "ci_high"]
+    ].round(3)
+
+    # Kruskal-Wallis on all n >= MIN_N groups for this variable
+    keep = sub.groupby(col).filter(lambda g: len(g) >= MIN_N)
+    samples = [g["mean_deviation"].values for _, g in keep.groupby(col)]
+    if len(samples) >= 2:
+        H, p = stats.kruskal(*samples)
+        k = len(samples)
+        n = sum(len(s) for s in samples)
+        eta2 = (H - k + 1) / (n - k) if (n - k) > 0 else np.nan
+    else:
+        H = p = eta2 = np.nan
+        k = n = 0
+
+    print(f"=== {label} ({col}) ===")
+    print(
+        f"Groups with n >= {MIN_N}: {out_qual.shape[0]} shown; "
+        f"excluded below threshold: {n_excluded}"
+        + (f"; capped at top {top_n} by count" if top_n else "")
+    )
+    display(out_qual)
+    print(
+        f"Kruskal-Wallis H={H:.2f}, p={p:.3g}, approx eta^2={eta2:.4f} "
+        f"(k={k} groups, n={n} respondents)"
+    )
+    spread = out_qual["mean_deviation"].max() - out_qual["mean_deviation"].min()
+    print(f"Spread (max − min mean deviation): {spread:.3f} percentage points\n")
+    return out_qual
+
+
+age_tbl = group_comparison(respondent_optimism, "age_band", "Age band")
+eng_tbl = group_comparison(
+    respondent_optimism, "english_background", "English background"
+)
+edu_tbl = group_comparison(respondent_optimism, "education_level", "Education level")
+country_tbl = group_comparison(
+    respondent_optimism,
+    "country_of_residence",
+    "Country of residence",
+    top_n=15,
+)
+
+# Store for plotting
+q2_tables = {
+    "Age band": age_tbl,
+    "English background": eng_tbl,
+    "Education level": edu_tbl,
+    "Country of residence": country_tbl,
+}
+```
+
+Excluded groups with n < 30 were *Under 18* (age) and *Less than high school* (education). For country, 12 countries met the sample-size threshold (so the “top 15 qualifying” list is those 12). Education shows the largest spread among the multi-category demographics in the tables above; English-background differences are near zero.
