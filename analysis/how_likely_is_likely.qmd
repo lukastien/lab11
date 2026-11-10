@@ -13,3 +13,41 @@ jupyter: python3
 ## Introduction
 
 This report analyzes the TidyTuesday dataset from Adam Kucharski's online quiz "How likely is 'likely'?", in which more than 5,000 participants assigned numeric probabilities (0–100%) to 19 everyday probability phrases and compared pairs of those phrases. The quiz also collected respondent demographics such as age band, English-language background, education level, and country of residence. The released data include absolute probability judgements, pairwise comparison choices, and respondent metadata. Here I focus on two questions: (1) which phrases people disagree on most when translating them into numeric probabilities, and (2) which demographic backgrounds tend to assign higher probabilities—i.e., appear more "optimistic"—after controlling for phrase.
+
+## Setup and Data Loading
+
+The following chunk imports the packages used throughout the report.
+
+```{python}
+#| label: imports
+#| warning: false
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+```
+
+Load the three raw CSVs from `../data/raw/` (paths are relative to the `analysis/` directory, where Quarto executes the notebook).
+
+```{python}
+#| label: load-data
+#| warning: false
+
+judgements = pd.read_csv("../data/raw/absolute_judgements.csv")
+pairwise = pd.read_csv("../data/raw/pairwise_comparisons.csv")
+metadata = pd.read_csv("../data/raw/respondent_metadata.csv")
+
+print("=== absolute_judgements ===")
+judgements.info()
+display(judgements.head())
+
+print("=== pairwise_comparisons ===")
+pairwise.info()
+display(pairwise.head())
+
+print("=== respondent_metadata ===")
+metadata.info()
+display(metadata.head())
+```
