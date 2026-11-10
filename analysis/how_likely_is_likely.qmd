@@ -148,6 +148,10 @@ rank_compare = pd.DataFrame({"rank_by_std": rank_sd, "rank_by_iqr": rank_iqr})
 print("Top 5 by SD:", term_summary.head(5).index.tolist())
 print("Top 5 by IQR:", term_summary.sort_values("iqr", ascending=False).head(5).index.tolist())
 display(rank_compare.sort_values("rank_by_std").head(10))
+
+# Save Q1 summary for reuse
+term_summary.reset_index().to_csv("../data/processed/term_summary.csv", index=False)
+print("Wrote ../data/processed/term_summary.csv")
 ```
 
 The table is sorted by standard deviation (descending). The top four phrases by SD — *Realistic Possibility*, *Could Happen*, *Might Happen*, and *May Happen* — are also the top four by IQR, so those rankings agree closely. Lower in the list, rankings diverge somewhat (for example *Highly Unlikely* ranks high on SD but much lower on IQR because of a long right tail), so IQR is a useful robustness check for outlier-driven disagreement.
@@ -252,6 +256,10 @@ print(
     ),
 )
 display(respondent_optimism.head())
+
+# Save respondent-level optimism scores with metadata
+respondent_optimism.to_csv("../data/processed/respondent_optimism.csv", index=False)
+print("Wrote ../data/processed/respondent_optimism.csv")
 ```
 
 Because every respondent rated the same 19 terms, mean deviation equals the raw mean probability minus a constant (the average of the 19 term means). The two scores are therefore perfectly correlated here; the deviation form still makes the “relative to the phrase mean” interpretation explicit for later group comparisons.
