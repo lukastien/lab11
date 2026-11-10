@@ -151,3 +151,39 @@ display(rank_compare.sort_values("rank_by_std").head(10))
 ```
 
 The table is sorted by standard deviation (descending). The top four phrases by SD — *Realistic Possibility*, *Could Happen*, *Might Happen*, and *May Happen* — are also the top four by IQR, so those rankings agree closely. Lower in the list, rankings diverge somewhat (for example *Highly Unlikely* ranks high on SD but much lower on IQR because of a long right tail), so IQR is a useful robustness check for outlier-driven disagreement.
+
+The box plot below shows the full distribution of assigned probabilities for each phrase, ordered by median probability so that the typical ranking of phrases is easy to read.
+
+```{python}
+#| label: q1-boxplot
+#| fig-cap: "Horizontal box plots of assigned probability (%) by phrase, ordered by median probability."
+#| warning: false
+#| fig-width: 9
+#| fig-height: 8
+
+term_order_median = (
+    judgements.groupby("term")["probability"].median().sort_values().index.tolist()
+)
+plot_df = judgements.copy()
+plot_df["term"] = pd.Categorical(plot_df["term"], categories=term_order_median, ordered=True)
+
+sns.set_theme(style="whitegrid", context="notebook")
+fig, ax = plt.subplots(figsize=(9, 8))
+sns.boxplot(
+    data=plot_df,
+    y="term",
+    x="probability",
+    color="#4C78A8",
+    fliersize=1.5,
+    linewidth=0.8,
+    ax=ax,
+)
+ax.set_xlabel("Probability assigned (%)")
+ax.set_ylabel("Probability phrase")
+ax.set_title("Distribution of assigned probabilities by phrase")
+ax.set_xlim(0, 100)
+fig.tight_layout()
+plt.show()
+```
+
+Extreme certainty phrases (*Almost No Chance*, *Almost Certain*, *Will Happen*, *About Even*) have tight boxes near the edges or at 50%, while mid-probability phrases such as *Could Happen*, *Might Happen*, *May Happen*, and *Realistic Possibility* show much wider spreads.
