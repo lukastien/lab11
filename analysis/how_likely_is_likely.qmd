@@ -51,3 +51,68 @@ print("=== respondent_metadata ===")
 metadata.info()
 display(metadata.head())
 ```
+
+## Data Checks
+
+The TidyTuesday curators note that no cleaning was necessary. The checks below verify that claim for the absolute judgements and pairwise tables, and document missingness in the demographic metadata.
+
+```{python}
+#| label: data-checks
+#| warning: false
+
+# (a) Missing values per column
+print("(a) Missing values per column")
+print("absolute_judgements:\n", judgements.isna().sum().to_string(), "\n")
+print("pairwise_comparisons:\n", pairwise.isna().sum().to_string(), "\n")
+print("respondent_metadata:\n", metadata.isna().sum().to_string(), "\n")
+
+# (b) Probability range
+prob_min = judgements["probability"].min()
+prob_max = judgements["probability"].max()
+n_out_of_range = ((judgements["probability"] < 0) | (judgements["probability"] > 100)).sum()
+print(f"(b) Probability min={prob_min}, max={prob_max}; outside 0-100: {n_out_of_range}")
+
+# (c) Unique terms
+terms = sorted(judgements["term"].unique())
+print(f"(c) Unique terms: {len(terms)}")
+print(terms)
+
+# (d) Unique respondents and set differences
+j_ids = set(judgements["response_id"].unique())
+p_ids = set(pairwise["response_id"].unique())
+m_ids = set(metadata["response_id"].unique())
+print(
+    f"(d) Unique respondents — judgements: {len(j_ids)}, "
+    f"pairwise: {len(p_ids)}, metadata: {len(m_ids)}"
+)
+print(f"    In judgements but not metadata: {len(j_ids - m_ids)}")
+print(f"    In metadata but not judgements: {len(m_ids - j_ids)}")
+print(f"    In pairwise but not metadata: {len(p_ids - m_ids)}")
+
+# (e) Terms per respondent
+terms_per = judgements.groupby("response_id")["term"].nunique()
+print("(e) Terms per respondent value counts:")
+print(terms_per.value_counts().sort_index().to_string())
+print(f"    Respondents with != 19 terms: {(terms_per != 19).sum()}")
+
+# (f) Duplicate (response_id, term) rows
+n_dup_pairs = judgements.duplicated(subset=["response_id", "term"]).sum()
+print(f"(f) Duplicate (response_id, term) rows: {n_dup_pairs}")
+
+# (g) Demographic unique values
+print("(g) Demographic unique values")
+print("age_band:", sorted(metadata["age_band"].dropna().unique().tolist()))
+print(
+    "english_background:",
+    sorted(metadata["english_background"].dropna().unique().tolist()),
+)
+print(
+    "education_level:",
+    sorted(metadata["education_level"].dropna().unique().tolist()),
+)
+print(f"Unique countries: {metadata['country_of_residence'].nunique(dropna=True)}")
+```
+
+**What the checks found.** Absolute judgements and pairwise comparisons have no missing values. All probability ratings fall within 0–100. There are exactly 19 unique terms, and every one of the 5,174 respondents appears in all three tables with no mismatches. Every respondent rated all 19 terms exactly once (no duplicate `(response_id, term)` rows). Demographic fields do have missing values: age band (437), English background (421), education level (663), and country of residence (720), with 64 unique countries among non-missing responses.
+
+**Decisions.** No rows are dropped from the judgement or pairwise tables. For demographic analyses later, respondents with missing values on a given demographic variable are excluded from that variable's grouping only (pairwise-complete cases). No imputation is applied.
