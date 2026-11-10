@@ -1,0 +1,16 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: b6a03132-bdef-4e34-b3cf-c47edc81acad
+  title: How Likely Is 'Likely'?
+  description: TidyTuesday analysis of probability phrases from Adam Kucharski's quiz
+  authors:
+    - Lukas
+  github: https://github.com/lukastien/lab11
+  # To autogenerate a Table of Contents, run "myst init --write-toc"
+site:
+  template: book-theme
+  title: lab11
+  actions:
+    - title: GitHub
+      url: https://github.com/lukastien/lab11
