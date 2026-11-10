@@ -187,3 +187,24 @@ plt.show()
 ```
 
 Extreme certainty phrases (*Almost No Chance*, *Almost Certain*, *Will Happen*, *About Even*) have tight boxes near the edges or at 50%, while mid-probability phrases such as *Could Happen*, *Might Happen*, *May Happen*, and *Realistic Possibility* show much wider spreads.
+
+The bar chart below ranks phrases by disagreement (standard deviation), with the most disputed phrases at the top.
+
+```{python}
+#| label: q1-disagreement-bars
+#| fig-cap: "Standard deviation of assigned probability (%) by phrase, sorted descending so the most disputed phrases appear at the top."
+#| warning: false
+#| fig-width: 9
+#| fig-height: 7
+
+sd_order = term_summary["std"].sort_values(ascending=True)
+fig, ax = plt.subplots(figsize=(9, 7))
+ax.barh(sd_order.index, sd_order.values, color="#4C78A8")
+ax.set_xlabel("Standard deviation of probability assigned (percentage points)")
+ax.set_ylabel("Probability phrase")
+ax.set_title("Disagreement by phrase (standard deviation)")
+fig.tight_layout()
+plt.show()
+```
+
+*Realistic Possibility* stands out with the largest standard deviation (~20.6 percentage points), followed by *Could Happen*, *Might Happen*, and *May Happen*. Phrases that imply near-certainty or near-impossibility, along with *About Even*, show the least disagreement.
