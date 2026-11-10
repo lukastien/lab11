@@ -116,3 +116,38 @@ print(f"Unique countries: {metadata['country_of_residence'].nunique(dropna=True)
 **What the checks found.** Absolute judgements and pairwise comparisons have no missing values. All probability ratings fall within 0–100. There are exactly 19 unique terms, and every one of the 5,174 respondents appears in all three tables with no mismatches. Every respondent rated all 19 terms exactly once (no duplicate `(response_id, term)` rows). Demographic fields do have missing values: age band (437), English background (421), education level (663), and country of residence (720), with 64 unique countries among non-missing responses.
 
 **Decisions.** No rows are dropped from the judgement or pairwise tables. For demographic analyses later, respondents with missing values on a given demographic variable are excluded from that variable's grouping only (pairwise-complete cases). No imputation is applied.
+
+## Question 1: Which phrases do people most disagree on, in relation to the probability they represent?
+
+Using only `absolute_judgements`, I summarize how widely respondents disagree on the numeric probability attached to each phrase. **Disagreement** is defined as the standard deviation of assigned probabilities; the interquartile range (IQR) is used as a robustness check.
+
+```{python}
+#| label: q1-term-summary
+#| warning: false
+
+grouped = judgements.groupby("term")["probability"]
+term_summary = pd.DataFrame(
+    {
+        "n": grouped.count(),
+        "mean": grouped.mean(),
+        "median": grouped.median(),
+        "std": grouped.std(),
+        "iqr": grouped.quantile(0.75) - grouped.quantile(0.25),
+        "p10": grouped.quantile(0.10),
+        "p90": grouped.quantile(0.90),
+    }
+)
+term_summary["p10_p90_range"] = term_summary["p90"] - term_summary["p10"]
+term_summary = term_summary.sort_values("std", ascending=False).round(2)
+term_summary.index.name = "term"
+display(term_summary.reset_index())
+
+rank_sd = term_summary["std"].rank(ascending=False)
+rank_iqr = term_summary["iqr"].rank(ascending=False)
+rank_compare = pd.DataFrame({"rank_by_std": rank_sd, "rank_by_iqr": rank_iqr})
+print("Top 5 by SD:", term_summary.head(5).index.tolist())
+print("Top 5 by IQR:", term_summary.sort_values("iqr", ascending=False).head(5).index.tolist())
+display(rank_compare.sort_values("rank_by_std").head(10))
+```
+
+The table is sorted by standard deviation (descending). The top four phrases by SD — *Realistic Possibility*, *Could Happen*, *Might Happen*, and *May Happen* — are also the top four by IQR, so those rankings agree closely. Lower in the list, rankings diverge somewhat (for example *Highly Unlikely* ranks high on SD but much lower on IQR because of a long right tail), so IQR is a useful robustness check for outlier-driven disagreement.
