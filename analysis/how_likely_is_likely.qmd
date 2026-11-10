@@ -208,3 +208,5 @@ plt.show()
 ```
 
 *Realistic Possibility* stands out with the largest standard deviation (~20.6 percentage points), followed by *Could Happen*, *Might Happen*, and *May Happen*. Phrases that imply near-certainty or near-impossibility, along with *About Even*, show the least disagreement.
+
+**Answer to Question 1.** The most disputed phrases are *Realistic Possibility* (SD = 20.55, median = 60%), *Could Happen* (SD = 18.23, median = 40%), *Might Happen* (SD = 17.66, median = 40%), *May Happen* (SD = 17.02, median = 40%), and *Highly Unlikely* (SD = 12.41, median = 5%). Disagreement is highest for mid-range, hedged phrases whose typical ratings sit between roughly 40% and 60%, not for extreme phrases. Extreme phrases such as *About Even* (SD = 3.66), *Almost Certain* (SD = 5.79), and *Almost No Chance* (SD = 6.04) show much tighter agreement. The IQR ranking matches the SD ranking for the top mid-range phrases, which supports treating those phrases as the main locus of disagreement rather than an artifact of a few outliers.
