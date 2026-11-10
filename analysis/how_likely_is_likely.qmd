@@ -417,3 +417,5 @@ plt.show()
 ```
 
 Across panels, education and country show clearer separations than English background. High school and some-college groups sit above zero, while postgraduate sits slightly below; among countries with enough respondents, the United States is above zero and Norway is below.
+
+**Answer to Question 2.** By age band, the highest mean deviation is *18–24* (+0.61 pp) and the lowest is *55–64* (−0.87 pp), a spread of about 1.5 percentage points. By English background, differences are tiny (spread ≈ 0.43 pp), with overlapping confidence intervals. By education, *High school* is highest (+2.33 pp) and *Postgraduate* is lowest (−0.35 pp), a spread of about 2.68 pp. Among countries with n ≥ 30, the United States is highest (+0.66 pp) and Norway is lowest (−2.03 pp), a spread of about 2.68 pp. Education level and country of residence show the largest spreads; English background shows almost none. Even the largest demographic spreads (~2.7 pp) are much smaller than term-level disagreement in Question 1, where the most disputed phrase had a standard deviation of about 20.6 percentage points.
