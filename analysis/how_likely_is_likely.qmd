@@ -1,0 +1,15 @@
+---
+title: "How Likely Is 'Likely'?"
+author: "Lukas"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+jupyter: python3
+---
+
+## Introduction
+
+This report analyzes the TidyTuesday dataset from Adam Kucharski's online quiz "How likely is 'likely'?", in which more than 5,000 participants assigned numeric probabilities (0–100%) to 19 everyday probability phrases and compared pairs of those phrases. The quiz also collected respondent demographics such as age band, English-language background, education level, and country of residence. The released data include absolute probability judgements, pairwise comparison choices, and respondent metadata. Here I focus on two questions: (1) which phrases people disagree on most when translating them into numeric probabilities, and (2) which demographic backgrounds tend to assign higher probabilities—i.e., appear more "optimistic"—after controlling for phrase.
