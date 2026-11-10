@@ -210,3 +210,48 @@ plt.show()
 *Realistic Possibility* stands out with the largest standard deviation (~20.6 percentage points), followed by *Could Happen*, *Might Happen*, and *May Happen*. Phrases that imply near-certainty or near-impossibility, along with *About Even*, show the least disagreement.
 
 **Answer to Question 1.** The most disputed phrases are *Realistic Possibility* (SD = 20.55, median = 60%), *Could Happen* (SD = 18.23, median = 40%), *Might Happen* (SD = 17.66, median = 40%), *May Happen* (SD = 17.02, median = 40%), and *Highly Unlikely* (SD = 12.41, median = 5%). Disagreement is highest for mid-range, hedged phrases whose typical ratings sit between roughly 40% and 60%, not for extreme phrases. Extreme phrases such as *About Even* (SD = 3.66), *Almost Certain* (SD = 5.79), and *Almost No Chance* (SD = 6.04) show much tighter agreement. The IQR ranking matches the SD ranking for the top mid-range phrases, which supports treating those phrases as the main locus of disagreement rather than an artifact of a few outliers.
+
+## Question 2: Which demographic background is the most optimistic?
+
+**Definition of "optimistic".** Here, a more optimistic respondent is one who assigns *higher probabilities to the same phrases on average*. That is a narrow, operational definition: it captures a tendency toward higher numeric ratings, not broader psychological optimism, risk appetite, or beliefs about future events. Limits of this definition include that (1) all phrases are rated in isolation from real-world stakes, (2) higher ratings on low-probability phrases and high-probability phrases are treated the same after centering, and (3) demographic differences may reflect language interpretation rather than outlook.
+
+To control for term, I subtract each term's overall mean probability from each judgement, then average those deviations within respondent. I also compute each respondent's raw mean probability for comparison.
+
+```{python}
+#| label: q2-respondent-deviations
+#| warning: false
+
+# Term-level means and per-judgement deviations
+term_mean_map = judgements.groupby("term")["probability"].mean()
+judgements = judgements.copy()
+judgements["term_mean"] = judgements["term"].map(term_mean_map)
+judgements["deviation"] = judgements["probability"] - judgements["term_mean"]
+
+# Respondent-level optimism scores
+respondent_optimism = (
+    judgements.groupby("response_id")
+    .agg(
+        mean_deviation=("deviation", "mean"),
+        raw_mean_probability=("probability", "mean"),
+        n_terms=("term", "count"),
+    )
+    .reset_index()
+)
+
+# Merge demographics
+respondent_optimism = respondent_optimism.merge(metadata, on="response_id", how="left")
+
+print(respondent_optimism[["mean_deviation", "raw_mean_probability"]].describe().round(3))
+print(
+    "Correlation between raw mean and mean deviation:",
+    round(
+        respondent_optimism["mean_deviation"].corr(
+            respondent_optimism["raw_mean_probability"]
+        ),
+        4,
+    ),
+)
+display(respondent_optimism.head())
+```
+
+Because every respondent rated the same 19 terms, mean deviation equals the raw mean probability minus a constant (the average of the 19 term means). The two scores are therefore perfectly correlated here; the deviation form still makes the “relative to the phrase mean” interpretation explicit for later group comparisons.
