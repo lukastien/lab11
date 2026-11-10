@@ -187,6 +187,7 @@ ax.set_ylabel("Probability phrase")
 ax.set_title("Distribution of assigned probabilities by phrase")
 ax.set_xlim(0, 100)
 fig.tight_layout()
+fig.savefig("../figures/q1_probability_by_term.png", dpi=200, bbox_inches="tight")
 plt.show()
 ```
 
@@ -208,6 +209,7 @@ ax.set_xlabel("Standard deviation of probability assigned (percentage points)")
 ax.set_ylabel("Probability phrase")
 ax.set_title("Disagreement by phrase (standard deviation)")
 fig.tight_layout()
+fig.savefig("../figures/q1_disagreement_by_term.png", dpi=200, bbox_inches="tight")
 plt.show()
 ```
 
@@ -421,6 +423,7 @@ for ax, (title, tbl) in zip(axes.flat, panel_order):
 
 fig.suptitle("Optimism by demographic group (phrase-adjusted)", fontsize=13, y=1.01)
 fig.tight_layout()
+fig.savefig("../figures/q2_optimism_by_demographic.png", dpi=200, bbox_inches="tight")
 plt.show()
 ```
 
