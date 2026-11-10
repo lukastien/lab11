@@ -355,3 +355,65 @@ q2_tables = {
 ```
 
 Excluded groups with n < 30 were *Under 18* (age) and *Less than high school* (education). For country, 12 countries met the sample-size threshold (so the “top 15 qualifying” list is those 12). Education shows the largest spread among the multi-category demographics in the tables above; English-background differences are near zero.
+
+The forest-style plots below show each group's mean deviation with its 95% t-based CI. Groups are ordered by mean deviation; the dashed line at 0 is the overall phrase-adjusted average.
+
+```{python}
+#| label: q2-forest-plots
+#| fig-cap: "Mean phrase-adjusted probability deviation (percentage points) by demographic group, with 95% t-based confidence intervals. Positive values indicate higher-than-average probability assignments (more 'optimistic' under the operational definition)."
+#| warning: false
+#| fig-width: 12
+#| fig-height: 10
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+panel_order = [
+    ("Age band", age_tbl),
+    ("English background", eng_tbl),
+    ("Education level", edu_tbl),
+    ("Country of residence", country_tbl),
+]
+
+for ax, (title, tbl) in zip(axes.flat, panel_order):
+    # Order ascending so highest optimism appears at top of horizontal plot
+    plot_tbl = tbl.sort_values("mean_deviation", ascending=True).reset_index(drop=True)
+    y = np.arange(len(plot_tbl))
+    x = plot_tbl["mean_deviation"].values
+    xerr = np.vstack(
+        [
+            x - plot_tbl["ci_low"].values,
+            plot_tbl["ci_high"].values - x,
+        ]
+    )
+    ax.errorbar(
+        x,
+        y,
+        xerr=xerr,
+        fmt="o",
+        color="#4C78A8",
+        ecolor="#4C78A8",
+        elinewidth=1.2,
+        capsize=3,
+        markersize=5,
+    )
+    ax.axvline(0, color="gray", linestyle="--", linewidth=1)
+    ax.set_yticks(y)
+    # Shorten long English labels for readability
+    labels = [
+        (
+            g.replace("English is not my first language and I am not fluent", "Non-fluent L2")
+            .replace("English is not my first language but I am fluent", "Fluent L2")
+            .replace("English is my first language", "L1 English")
+        )
+        for g in plot_tbl["group"]
+    ]
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.set_xlabel("Mean deviation (percentage points)")
+    ax.set_title(title)
+    ax.grid(axis="x", linestyle=":", alpha=0.6)
+
+fig.suptitle("Optimism by demographic group (phrase-adjusted)", fontsize=13, y=1.01)
+fig.tight_layout()
+plt.show()
+```
+
+Across panels, education and country show clearer separations than English background. High school and some-college groups sit above zero, while postgraduate sits slightly below; among countries with enough respondents, the United States is above zero and Norway is below.
